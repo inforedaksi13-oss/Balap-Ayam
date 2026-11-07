@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#e8590c">
+<title>Balap Ayam</title>
+<style>
+:root{--bg:#fff4d6;--ink:#3b2a14;--card:rgba(255,255,255,.92);--hd:#ffffff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#241a0c;--ink:#fff;--hd:#3a2a14}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",system-ui,sans-serif;display:flex;flex-direction:column;gap:8px;padding:8px}
+header{display:flex;align-items:center;gap:10px;background:var(--hd);border-radius:14px;padding:6px 12px;flex-wrap:wrap}
+.logo{font-weight:900;font-size:22px;color:#e8590c;letter-spacing:1px;white-space:nowrap}
+.info{flex:1;text-align:center;background:#fff;color:#3b2a14;border-radius:10px;padding:6px 10px;font-size:14px;font-weight:700;min-width:200px}
+.badge{background:#ffd43b;border-radius:20px;padding:2px 10px;margin-left:6px;font-size:12px}
+.btns{display:flex;gap:6px}.btns button{width:38px;height:38px;border:0;border-radius:10px;background:#ffd43b;font-size:18px;cursor:pointer}
+#frame{position:relative;flex:1;min-height:320px;border-radius:16px;overflow:hidden;background:#87ceeb}
+canvas{display:block;width:100%;height:100%}
+.ov{position:absolute;pointer-events:none}
+.tag{top:8px;left:12px;color:#fff;font-weight:800;text-shadow:0 1px 3px #000;font-size:14px}
+.mode{top:8px;right:12px;background:#228be6;color:#fff;border-radius:8px;padding:3px 10px;font-weight:800;font-size:13px}
+#prog{left:8px;top:50%;transform:translateY(-50%);background:var(--card);color:#3b2a14;border-radius:30px;padding:8px 5px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;font-size:11px}
+#prog i{width:28px;height:28px;border-radius:50%;background:#dee2e6;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px}
+#prog i.ok{background:#40c057;color:#fff}#prog i.cur{outline:3px solid #ffd43b}
+#card{position:absolute;top:38px;left:50%;transform:translateX(-50%);width:min(620px,calc(100% - 110px));background:var(--card);color:#3b2a14;border-radius:18px;padding:10px 14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.ch{display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:#e8590c}
+#qt{text-align:center;font-weight:900;font-size:clamp(14px,2.4vw,20px);margin:6px 0}
+#ans{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#ans button{border:0;border-radius:12px;padding:10px 6px;font-weight:700;font-size:clamp(13px,2vw,17px);font-family:inherit;background:#fff3bf;color:#3b2a14;cursor:pointer;box-shadow:0 3px 0 #e0b800}
+#ans button.good{background:#40c057;color:#fff;box-shadow:0 3px 0 #2b8a3e}
+#ans button.bad{background:#fa5252;color:#fff;box-shadow:0 3px 0 #c92a2a;animation:sh .4s}
+@keyframes sh{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.ft{text-align:center;font-size:11px;margin-top:6px;opacity:.7}
+#rear{left:10px;bottom:10px;width:110px;height:64px;border:3px solid #fff;border-radius:10px;background:linear-gradient(#9ad7f5,#6bbf59);color:#fff;font-size:10px;font-weight:800;text-align:center;padding-top:2px;text-shadow:0 1px 2px #000}
+#left{right:10px;bottom:10px;background:#fff;color:#3b2a14;border-radius:20px;padding:5px 12px;font-weight:800;font-size:13px}
+#modal{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:5}
+#mb{background:#fff;color:#3b2a14;border-radius:20px;padding:24px 30px;text-align:center;max-width:90%}
+#modal h2{margin:0 0 6px;color:#e8590c}#modal button{margin-top:12px;border:0;border-radius:12px;background:#40c057;color:#fff;font-weight:800;font-size:18px;font-family:inherit;padding:10px 22px;cursor:pointer}
+#sb{right:8px;top:50%;transform:translateY(-50%);background:var(--card);color:#3b2a14;border-radius:14px;padding:6px 8px;font-size:11px;font-weight:800;display:none}
+#sb div{display:flex;align-items:center;gap:5px;padding:2px 4px;border-radius:8px;white-space:nowrap}#sb div.on{background:#ffd43b}
+#sb b{width:12px;height:12px;border-radius:50%;border:2px solid #3b2a14;display:inline-block}
+#tn{position:absolute;left:50%;top:60%;background:#ffd43b;color:#3b2a14;font-weight:900;font-size:clamp(18px,4vw,34px);padding:8px 22px;border-radius:30px;pointer-events:none;opacity:0;white-space:nowrap}
+#tn.go{animation:pop 1.3s}@keyframes pop{0%{opacity:0;transform:translateX(-50%) scale(.5)}20%,70%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) scale(1)}}
+#card{border-top:6px solid transparent}
+.pl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+#cells{position:absolute;inset:0;display:none;pointer-events:none}
+#cells.on{display:grid}
+#cells.n2{grid-template-columns:1fr 1fr}#cells.n3{grid-template-columns:repeat(3,1fr)}#cells.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+#cells.port.n2,#cells.port.n3{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:1fr}
+.cell{position:relative;container-type:size;border:3px solid var(--c)}
+.pc{position:absolute;left:3%;right:3%;top:5px;background:var(--card);color:#3b2a14;border-radius:12px;padding:5px 8px;border-top:5px solid var(--c);pointer-events:auto;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.ph{display:flex;align-items:center;gap:6px;font-size:clamp(9px,3cqw,13px);font-weight:800}
+.ph b{width:12px;height:12px;border-radius:50%;background:var(--c);border:2px solid #3b2a14;flex:none}
+.ph em{margin-left:auto;font-style:normal;color:#e8590c}.ph u{text-decoration:none;background:#ffd43b;border-radius:10px;padding:0 6px}
+.pbar{display:flex;gap:3px;justify-content:center;margin-top:3px}
+.pbar i{width:clamp(12px,4cqw,18px);height:clamp(12px,4cqw,18px);border-radius:50%;background:#dee2e6;font-style:normal;font-size:clamp(8px,2.4cqw,11px);display:flex;align-items:center;justify-content:center;font-weight:800}
+.pbar i.ok{background:#40c057;color:#fff}
+.pq{font-weight:900;text-align:center;font-size:clamp(10px,3.6cqw,17px);margin:4px 0}
+.pa{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pa button{border:0;border-radius:8px;padding:6px 3px;font-weight:700;font-size:clamp(9px,3cqw,14px);font-family:inherit;background:#fff3bf;color:#3b2a14;cursor:pointer;box-shadow:0 2px 0 #e0b800}
+.pa button.good{background:#40c057;color:#fff;box-shadow:0 2px 0 #2b8a3e}
+.pa button.bad{background:#fa5252;color:#fff;box-shadow:0 2px 0 #c92a2a;animation:sh .4s}
+#cells.lock .pq,#cells.lock .pa{filter:blur(8px)}
+#frame.multi #prog,#frame.multi #rear,#frame.multi #left,#frame.multi .tag,#frame.multi #sb,#frame.multi #card{display:none!important}
+
+/* ===== RESPONSIF & SENTUH (Android / iPhone) ===== */
+html{height:100%;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+@supports (height:100dvh){html{height:100dvh}}
+body{height:100%;overflow:hidden;overscroll-behavior:none;padding:8px max(8px,env(safe-area-inset-right)) 8px max(8px,env(safe-area-inset-left));
+ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#frame{min-height:0}
+#mb{max-height:92%;overflow:auto}
+.hint{display:none}
+@media (orientation:portrait){.hint{display:block;font-size:12px;color:#e8590c;margin:8px 0 0}}
+@media (pointer:coarse){
+ .btns button{width:44px;height:44px}
+ #ans button{min-height:48px}.pa button{min-height:38px}
+ #modal button{min-height:48px}
+}
+#cells.port.n3{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;grid-auto-rows:auto}
+#cells.port.n3 .cell:nth-child(3){grid-column:1/-1}
+@media (max-width:640px){
+ body{gap:6px}
+ header{gap:6px;padding:5px 8px}
+ .logo{font-size:17px}
+ .info{order:3;flex-basis:100%;font-size:11px;padding:4px 8px;min-width:0}
+ .badge{padding:1px 8px;font-size:10px}
+ .btns{margin-left:auto}
+}
+@media (max-width:600px) and (orientation:portrait){
+ #card{top:auto;bottom:8px;width:calc(100% - 16px);padding:8px 10px}
+ #qt{font-size:clamp(14px,4.4vw,19px)}
+ #prog{left:50%;top:38px;transform:translateX(-50%);flex-direction:row;padding:5px 9px;gap:5px}
+ #prog span{display:none}#prog i{width:26px;height:26px}
+ #rear,#left{display:none}
+ .tag{font-size:12px}.mode{font-size:11px}
+}
+@media (max-height:500px) and (orientation:landscape){
+ body{gap:4px;padding-top:4px;padding-bottom:4px}
+ header{padding:3px 8px;flex-wrap:nowrap}
+ .logo{font-size:15px}
+ .info{order:0;flex-basis:auto;font-size:10px;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .btns button{width:36px;height:36px;font-size:15px}
+ #card{top:auto;bottom:8px;left:auto;right:8px;transform:none;width:min(48%,430px);padding:6px 10px}
+ #qt{font-size:clamp(11px,2.8vw,15px);margin:3px 0}
+ #ans button{padding:6px 4px;min-height:36px;font-size:clamp(11px,2.2vw,14px)}
+ .ft{display:none}
+ #prog{padding:5px 4px;gap:3px;font-size:9px}#prog i{width:22px;height:22px;font-size:11px}
+ #rear,#left{display:none}
+ .tag{font-size:12px}
+}
+</style></head><body>
+<header>
+ <div class="logo">🐔 BALAP AYAM</div>
+ <div class="info" id="info"></div>
+ <div class="btns"><button id="bA" title="Audio">🔊</button><button id="bF" title="Layar penuh">⛶</button><button id="bP" title="Jeda">⏸</button></div>
+</header>
+<div id="frame">
+ <div class="ov tag" id="tg">Pemain 1 • putih</div><div class="ov mode" id="md">LATIHAN</div><div class="ov" id="sb"></div><div id="tn">Giliran!</div>
+ <div class="ov" id="prog"></div>
+ <div id="card" style="display:none"><div class="ch"><span id="qn"></span><span id="qd"></span></div><div id="qt"></div><div id="ans"></div><div class="ft">Sentuh jawabanmu!</div></div>
+ <div class="ov" id="rear">BELAKANG</div><div class="ov" id="left"></div>
+ <div id="cells"></div>
+ <div id="modal"><div id="mb"></div></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===== TETAPAN & DATA SOAL (mudah disunting) ===== */
+const CFG={jenjang:"SD Kelas 3",mapel:"IPAS",topik:"Keajaiban Tubuhku - Panca Indra",tingkat:"Campuran"};
+/* Bank soal: Q(tingkat, soal, JAWABAN BENAR, salah1, salah2, salah3) - urutan pilihan diacak otomatis */
+const Q=(d,q,...o)=>({d,q,o});
+const QB=[
+Q("Mudah","Alat indra yang kita gunakan untuk melihat adalah ...","Mata","Telinga","Hidung","Lidah"),
+Q("Mudah","Telinga adalah alat indra untuk ...","Mendengar suara","Mencium bau","Melihat warna","Merasakan rasa"),
+Q("Mudah","Alat indra untuk mencium bau adalah ...","Hidung","Mata","Kulit","Telinga"),
+Q("Mudah","Rasa manis gula dirasakan oleh ...","Lidah","Hidung","Telinga","Mata"),
+Q("Mudah","Panas dan dingin dirasakan oleh ...","Kulit","Mata","Lidah","Telinga"),
+Q("Mudah","Manusia memiliki berapa panca indra?","Lima","Tiga","Empat","Enam"),
+Q("Mudah","Bunyi bel sekolah kita dengar menggunakan ...","Telinga","Mata","Hidung","Kulit"),
+Q("Mudah","Duri mawar terasa tajam saat disentuh. Alat indranya adalah ...","Kulit","Lidah","Mata","Hidung"),
+Q("Sedang","Kamu mencium aroma kue yang harum. Alat indra yang bekerja adalah ...","Hidung","Kulit","Telinga","Mata"),
+Q("Sedang","Dina memegang es batu dan merasa dingin. Indra yang digunakan adalah ...","Peraba","Pengecap","Pendengaran","Penglihatan"),
+Q("Sedang","Agar mata dapat melihat benda dengan jelas, kita membutuhkan ...","Cahaya","Suara","Bau","Rasa"),
+Q("Sedang","Bagian mata yang mengatur banyak sedikitnya cahaya yang masuk adalah ...","Pupil","Alis","Bulu mata","Kelopak"),
+Q("Sedang","Bagian telinga yang tampak dari luar dan menangkap suara disebut ...","Daun telinga","Gendang telinga","Lubang hidung","Kelopak"),
+Q("Sedang","Tempat udara dan bau masuk ke dalam hidung adalah ...","Lubang hidung","Gendang telinga","Pupil","Lidah"),
+Q("Sedang","Rasa yang dapat dikenali oleh lidah adalah ...","Manis, asin, asam, pahit","Panas, dingin","Keras, lunak","Terang, gelap"),
+Q("Sedang","Kasar atau halusnya permukaan kain dapat diketahui dengan ...","Kulit","Hidung","Telinga","Lidah"),
+Q("Sulit","Saat pilek, makanan terasa kurang enak karena indra ... terganggu.","Penciuman","Peraba","Penglihatan","Pendengaran"),
+Q("Sulit","Mengapa kita tidak boleh mengorek telinga dengan benda tajam?","Dapat merusak gendang telinga","Telinga jadi bau","Telinga jadi besar","Suara jadi keras"),
+Q("Sulit","Cara menjaga mata agar tetap sehat adalah ...","Membaca di tempat yang terang","Menonton TV sangat dekat","Mengucek mata dengan tangan kotor","Membaca di tempat gelap"),
+Q("Sulit","Rina tidak bisa membedakan panas dan dingin saat menyentuh benda. Indra yang terganggu adalah ...","Peraba","Pengecap","Penciuman","Pendengaran")
+];
+/* Soal per pemain: urutan tingkat kesukaran (jumlah soal = panjang PLAN). Tiap pemain mendapat soal BERBEDA. */
+const PLAN=["Mudah","Mudah","Sedang","Sedang","Sulit"],N=PLAN.length;
+const sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+function deal(n){const pool={};["Mudah","Sedang","Sulit"].forEach(d=>pool[d]=sh(QB.filter(x=>x.d===d)));
+ return Array.from({length:n},()=>PLAN.map(d=>{const x=pool[d].pop(),o=sh(x.o);return {q:x.q,d:x.d,o,a:o.indexOf(x.o[0])}}))}
+document.getElementById("info").innerHTML=`${CFG.jenjang} • ${CFG.mapel} • ${CFG.topik}<span class="badge">${CFG.tingkat}</span>`;
+
+/* ===== AUDIO ===== */
+let AC=null,mute=false;
+function tone(f,t,d,type="square",v=.08,s=0){if(mute)return;AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+ const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,AC.currentTime+s);
+ g.gain.setValueAtTime(v,AC.currentTime+s);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+s+d);
+ o.connect(g).connect(AC.destination);o.start(AC.currentTime+s);o.stop(AC.currentTime+s+d);}
+const sfx={ok(){[523,659,784].forEach((f,i)=>tone(f,0,.15,"triangle",.1,i*.09))},
+ bad(){for(let i=0;i<6;i++)tone(300+(i%2)*120-i*15,0,.18,"sawtooth",.07,i*.12)},
+ step(){tone(220,0,.08,"square",.05);tone(330,0,.08,"square",.05,.1)},
+ win(){[523,523,659,784,659,784,1047].forEach((f,i)=>tone(f,0,.22,"triangle",.1,i*.16));[1047,1319,1568,2093].forEach((f,i)=>tone(f,0,.3,"sine",.07,1.2+i*.1))},
+ click(){tone(700,0,.05,"square",.05)},
+ cluck(){tone(520,0,.06,"square",.06);tone(380,0,.09,"square",.06,.07)},
+ hop(){for(let i=0;i<5;i++)tone(250+i*80,0,.07,"sine",.08,i*.03)},
+ boing(){for(let i=0;i<6;i++)tone(500-i*55,0,.06,"sine",.09,i*.04)}};
+let stepT=0;
+/* ===== BACKSOUND (musik latar sintesis) ===== */
+function initA(){AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}
+const MEL=[523,0,659,0,784,659,523,0,587,0,698,0,880,698,587,0,659,0,784,0,988,784,659,0,523,587,659,784,659,587,523,0];
+const BAS=[131,131,196,196,175,175,196,196];
+let bgmOn=false,nT=0,stp=0;
+function startBGM(){if(bgmOn)return;bgmOn=true;initA();nT=AC.currentTime+.1;
+ setInterval(()=>{while(nT<AC.currentTime+.4){
+  const s=nT-AC.currentTime;
+  if(!mute&&!paused&&!done){const m=MEL[stp%32];if(m)tone(m,0,.2,"triangle",.05,s);
+   if(stp%4==0)tone(BAS[(stp>>2)%8],0,.45,"sine",.09,s);
+   if(stp%2==1)tone(1800,0,.03,"square",.012,s)}
+  nT+=.2;stp++}},100)}
+["pointerdown","touchstart","touchend","click","keydown"].forEach(e=>addEventListener(e,()=>{initA();startBGM()},{passive:true}));
+document.addEventListener("gesturestart",e=>e.preventDefault());
+
+/* ===== THREE ===== */
+const fr=document.getElementById("frame");
+const R=new THREE.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(window.devicePixelRatio||1,2));fr.prepend(R.domElement);
+const S=new THREE.Scene();S.background=new THREE.Color(0x8fd3f4);S.fog=new THREE.Fog(0x8fd3f4,50,130);
+const cam=new THREE.PerspectiveCamera(60,1,.1,300);
+S.add(new THREE.HemisphereLight(0xffffff,0x77aa55,.9));
+const sun=new THREE.DirectionalLight(0xffffff,.7);sun.position.set(10,20,10);S.add(sun);
+const M=c=>new THREE.MeshLambertMaterial({color:c});
+const box=(w,h,d,c,x=0,y=0,z=0,p=S)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);p.add(m);return m};
+const FIN=-60,Z0=0,LEN=200;
+box(160,.2,LEN,0x5fb24a,0,-.15,-60);
+box(8,.25,LEN,0x8b5a2b,0,-.05,-60);
+for(let z=4;z>-100;z-=3)box(.25,.02,1.4,0xffffff,0,.1,z);
+for(let z=8;z>-100;z-=3){[-4.4,4.4].forEach(x=>{box(.25,1.3,.25,0x8d5524,x,.6,z);});}
+[-4.4,4.4].forEach(x=>{box(.15,.2,LEN,0xa9713a,x,1.0,-60);box(.15,.2,LEN,0xa9713a,x,.5,-60)});
+/* finish */
+box(.4,6,.4,0xeeeeee,-4.6,3,FIN);box(.4,6,.4,0xeeeeee,4.6,3,FIN);
+const cv=document.createElement("canvas");cv.width=512;cv.height=128;const x=cv.getContext("2d");
+for(let i=0;i<32;i++)for(let j=0;j<8;j++){x.fillStyle=(i+j)%2?"#000":"#fff";x.fillRect(i*16,j*16,16,16)}
+x.fillStyle="rgba(255,255,255,.88)";x.fillRect(120,28,272,72);x.fillStyle="#d00";x.font="900 62px Trebuchet MS,sans-serif";x.textAlign="center";x.fillText("FINISH",256,86);
+const ban=new THREE.Mesh(new THREE.PlaneGeometry(9.6,2.4),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),side:2}));ban.position.set(0,5.6,FIN);S.add(ban);
+box(9,.1,.6,0xffffff,0,.12,FIN);
+/* scenery */
+for(let i=0;i<26;i++){const s=i%2?1:-1,z=-i*5+2,xx=s*(10+Math.random()*14);
+ box(.7,2,.7,0x7b4a1e,xx,1,z);const h=2+Math.random()*2;box(3,h,3,0x2f9e44,xx,2+h/2,z);box(2,1.2,2,0x37b24d,xx,2.2+h,z)}
+box(7,4,6,0xd9381e,-14,2,-20);box(7.4,.8,6.4,0x8a1f0f,-14,4.3,-20);box(2,2.8,.1,0x5c1a0f,-14,1.4,-16.95);
+[[8,-10],[10,-25],[9,-40],[-9,-35],[-8,-48]].forEach(([a,b])=>{box(1.8,1.2,1.2,0xf2c94c,a,.6,b);box(1.8,.1,1.2,0xc9a227,a,1.25,b)});
+for(let i=0;i<9;i++){const c=new THREE.Group();[[0,0,3,1.2,1.5],[1.6,.3,2,1,1.2],[-1.6,.2,2,.9,1.2]].forEach(a=>box(a[2],a[3],a[4],0xffffff,a[0],a[1],0,c));c.position.set(-60+i*16,22+Math.random()*8,-10-Math.random()*70);S.add(c)}
+/* chicken */
+function makeChicken(col,comb){
+ const ck=new THREE.Group(),body=new THREE.Group();ck.add(body);
+ const wc=new THREE.Color(col).offsetHSL(0,0,-.06);
+ box(1.2,1,1.6,col,0,1.3,0,body);box(.9,.9,.9,col,0,2.2,-.7,body);box(.25,.35,.7,comb,0,2.85,-.7,body);box(.25,.2,.3,comb,0,2.7,-.2,body);
+ box(.3,.2,.4,0xffa000,0,2.15,-1.3,body);box(.2,.3,.1,0xe03131,0,1.9,-1.2,body);
+ box(.15,.15,.05,0x000000,.3,2.35,-1.17,body);box(.15,.15,.05,0x000000,-.3,2.35,-1.17,body);
+ box(.25,.7,.8,wc,.7,1.3,0,body);box(.25,.7,.8,wc,-.7,1.3,0,body);box(.9,.9,.3,wc,0,1.6,.9,body);
+ const legs=[-.3,.3].map(l=>box(.15,.9,.15,0xffd43b,l,.45,.1,ck));
+ box(.5,.1,.5,0xffd43b,-.3,.05,-.1,ck);box(.5,.1,.5,0xffd43b,.3,.05,-.1,ck);
+ const stars=new THREE.Group();for(let i=0;i<5;i++){const m=box(.28,.28,.28,0xffd43b,Math.cos(i*1.256)*.9,0,Math.sin(i*1.256)*.9,stars);m.rotation.set(.7,.7,0)}
+ stars.position.y=3.5;stars.visible=false;ck.add(stars);
+ return {ck,body,legs,stars}}
+
+function size(){const w=fr.clientWidth,h=fr.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(size).observe(fr);size();
+
+/* ===== STATE & MULTIPLAYER (serentak: tiap pemain punya layar & soal sendiri) ===== */
+const SKIN=[["putih",0xffffff,"#ced4da"],["oranye",0xff922b,"#ff922b"],["biru",0x74c0fc,"#339af0"],["pink",0xf783ac,"#f06595"]];
+let P=[],paused=false,done=false,t0=0;
+const step=(Z0-FIN)/N;
+const prog=document.getElementById("prog");
+const bar=p=>PLAN.map((_,i)=>`<i class="${i<p.idx?"ok":""}">${i<p.idx?"✔":i+1}</i>`).join("");
+function updBar(p){if(P.length>1)p.cell.querySelector(".pbar").innerHTML=bar(p);else prog.innerHTML="<span>SOAL</span>"+PLAN.map((_,i)=>`<i class="${i<p.idx?"ok":i==p.idx?"cur":""}">${i<p.idx?"✔":i+1}</i>`).join("")}
+function menu(){mb.innerHTML=`<h2>🐔 BALAP AYAM</h2><p>Pilih jumlah pemain</p><div class="pl">${[1,2,3,4].map(n=>`<button data-n="${n}">${n} 🐔</button>`).join("")}</div><p style="font-size:12px;opacity:.7;margin:12px 0 0">1 pemain = Latihan<br>2–4 pemain = balapan serentak<br>(tiap pemain punya layar dan soal sendiri)</p><p class="hint">📱 Untuk 3–4 pemain, putar HP ke mode lanskap</p>`;
+ modal.style.display="flex";mb.querySelectorAll("button").forEach(b=>b.onclick=()=>start(+b.dataset.n))}
+function buildCells(){cells.innerHTML="";cells.className="on n"+P.length;
+ P.forEach(p=>{const c=document.createElement("div");c.className="cell";c.style.setProperty("--c",p.css);
+  c.innerHTML=`<div class="pc"><div class="ph"><b></b><span>${p.name} • ${p.cn}</span><em class="pn"></em><u class="pd"></u></div><div class="pbar"></div><div class="pq"></div><div class="pa"></div></div>`;
+  cells.appendChild(c);p.cell=c})}
+function ansBtns(p,q,box){box.innerHTML="";q.o.forEach((t,i)=>{const b=document.createElement("button");b.textContent=t;b.onclick=()=>pick(p,i,b);box.appendChild(b)})}
+function fillCell(p){const c=p.cell,q=p.qs[p.idx];
+ c.querySelector(".pn").textContent=`Soal ${p.idx+1} / ${N}`;c.querySelector(".pd").textContent=q.d;
+ c.querySelector(".pbar").innerHTML=bar(p);c.querySelector(".pq").textContent=q.q;ansBtns(p,q,c.querySelector(".pa"))}
+function draw(p){const q=p.qs[p.idx];
+ if(P.length===1){updBar(p);qn.textContent=`Soal ${p.idx+1} / ${N}`;qd.textContent=q.d;qt.textContent=q.q;
+  document.getElementById("left").textContent=`${N-p.idx} soal lagi`;tg.textContent=`${p.name} • ${p.cn}`;ansBtns(p,q,ans)}
+ else fillCell(p)}
+function start(n){const D=deal(n);
+ for(let i=0;i<n;i++){const k=SKIN[i],c=makeChicken(k[1],0xe03131);
+  c.ck.position.set(n>1?(i-(n-1)/2)*1.9:0,0,Z0);if(n>1)c.ck.scale.setScalar(.72);S.add(c.ck);
+  P.push({...c,name:"Pemain "+(i+1),cn:k[0],css:k[2],qs:D[i],idx:0,tz:Z0,dz:0,win:false,busy:false,camZ:Z0})}
+ md.textContent=n>1?`BALAPAN ${n} PEMAIN • SERENTAK`:"LATIHAN";
+ modal.style.display="none";t0=performance.now();startBGM();sfx.click();
+ if(n===1){card.style.display="block";draw(P[0]);return}
+ fr.classList.add("multi");buildCells();cells.classList.add("lock");P.forEach(p=>{p.busy=true;fillCell(p)});
+ ["3","2","1","MULAI!"].forEach((x,i)=>setTimeout(()=>{tn.textContent=x;tn.classList.remove("go");void tn.offsetWidth;tn.classList.add("go");
+  tone(x==="MULAI!"?880:440,0,.2,"square",.08);
+  if(i===3){cells.classList.remove("lock");P.forEach(p=>p.busy=false);t0=performance.now()}},i*900))}
+function pick(p,i,b){if(p.busy||paused||done)return;sfx.click();
+ if(i===p.qs[p.idx].a){p.busy=true;b.classList.add("good");sfx.ok();setTimeout(sfx.cluck,300);setTimeout(sfx.hop,450);
+  p.idx++;p.tz=Z0-step*p.idx;updBar(p);
+  setTimeout(()=>{if(done)return;if(p.idx>=N)finish(p);else{p.busy=false;draw(p)}},1100);
+ }else{b.classList.add("bad");sfx.bad();sfx.boing();p.dz=1.5;p.stars.visible=true;p.busy=true;
+  setTimeout(()=>{b.classList.remove("bad");p.busy=false},1500)}}
+function finish(p){done=true;p.win=true;p.tz=FIN-6;card.style.display="none";cells.style.pointerEvents="none";const el=Math.round((performance.now()-t0)/1000);
+ const rank=[...P].sort((a,b)=>b.idx-a.idx);
+ setTimeout(()=>{sfx.win();
+  mb.innerHTML=P.length>1?`<h2>🏆 ${p.name} menang! 🏆</h2><p>Ayam ${p.cn} mencapai garis FINISH pertama!</p><p style="text-align:left">${rank.map((q,i)=>`${i+1}. ${q.name} (${q.cn}) — ${q.idx}/${N} soal`).join("<br>")}</p><p>Waktu: ${el} detik</p><button onclick="location.reload()">Main Lagi</button>`
+  :`<h2>🎉 Selamat! 🎉</h2><p>Ayammu mencapai garis FINISH!</p><p><b>Skor: ${N} / ${N}</b> • Waktu: ${el} detik</p><button onclick="location.reload()">Main Lagi</button>`;
+  modal.style.display="flex"},1600)}
+bA.onclick=()=>{mute=!mute;bA.textContent=mute?"🔇":"🔊"};
+const de=document.documentElement;
+if(!(de.requestFullscreen||de.webkitRequestFullscreen))bF.style.display="none";/* iPhone tidak mendukung layar penuh: tombol disembunyikan */
+bF.onclick=()=>{const on=document.fullscreenElement||document.webkitFullscreenElement;
+ if(on){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else{(de.requestFullscreen||de.webkitRequestFullscreen).call(de)}};
+bP.onclick=()=>{if(!P.length||done)return;paused=!paused;bP.textContent=paused?"▶":"⏸";if(paused){mb.innerHTML="<h2>Jeda</h2><button id='rs'>Lanjut</button>";modal.style.display="flex";rs.onclick=bP.onclick}else modal.style.display="none"};
+
+/* ===== LOOP (satu layar terbagi: tiap pemain punya kamera sendiri) ===== */
+const clk=new THREE.Clock();
+function loop(){requestAnimationFrame(loop);const dt=Math.min(clk.getDelta(),.05),t=clk.elapsedTime;
+ if(!paused){let mv=false;
+  P.forEach(p=>{const ck=p.ck,dz=p.tz-ck.position.z;
+   if(Math.abs(dz)>.05){mv=true;ck.position.z+=Math.sign(dz)*Math.min(Math.abs(dz),(p.win?9:7)*dt);ck.position.y=Math.abs(Math.sin(t*10))*.7;
+    p.legs.forEach((l,i)=>l.rotation.x=Math.sin(t*14+i*3)*.5)}
+   else{ck.position.y=p.win?Math.abs(Math.sin(t*6))*1.4:0;p.legs.forEach(l=>l.rotation.x=0)}
+   if(p.dz>0){p.dz-=dt;p.body.rotation.z=Math.sin(t*14)*.35;p.body.rotation.y=Math.sin(t*9)*.5;p.stars.rotation.y+=dt*8;
+    if(p.dz<=0){p.dz=0;p.stars.visible=false;p.body.rotation.set(0,0,0)}}
+   p.camZ+=(ck.position.z-p.camZ)*Math.min(1,dt*3)});
+  if(mv){stepT-=dt;if(stepT<=0){tone(140,0,.05,"square",.04);stepT=.22}}}
+ const fw=fr.clientWidth,fh=fr.clientHeight,fb=fr.getBoundingClientRect();
+ cells.classList.toggle("port",fw<fh);
+ R.setScissorTest(true);
+ for(let i=0;i<Math.max(P.length,1);i++){const p=P[i];let r=[0,0,fw,fh];
+  if(P.length>1){const b=p.cell.getBoundingClientRect();r=[b.left-fb.left,fh-(b.bottom-fb.top),b.width,b.height]}
+  R.setViewport(...r);R.setScissor(...r);cam.aspect=r[2]/r[3];cam.fov=cam.aspect<1?75:60;cam.updateProjectionMatrix();
+  const cz=p?p.camZ:0,cx=P.length>1?p.ck.position.x:0;
+  const ly=P.length>1?2.6:(fw<fh&&fw<=600?-2.5:1.8);cam.position.set(cx,4.2,cz+8);cam.lookAt(cx,ly,cz-14);R.render(S,cam)}}
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&P.length&&!done&&!paused)bP.onclick()});
+menu();loop();
+</script></body></html>
